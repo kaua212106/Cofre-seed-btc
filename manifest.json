@@ -1,0 +1,16 @@
+{
+    "name": "Cofre BTC",
+    "short_name": "Cofre",
+    "description": "Cofre criptografado para múltiplas seeds",
+    "start_url": "index.html",
+    "display": "standalone",
+    "background_color": "#1a1a2e",
+    "theme_color": "#4cc9f0",
+    "icons": [
+        {
+            "src": "icone.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cofre BTC</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0F172A">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        :root {
+            --fundo-escuro: #0F172A;
+            --fundo-card: #1E293B;
+            --fundo-input: #334155;
+            --primaria: #3B82F6;
+            --primaria-clara: #60A5FA;
+            --sucesso: #10B981;
+            --aviso: #F59E0B;
+            --erro: #EF4444;
+            --texto: #F8FAFC;
+            --texto-claro: #94A3B8;
+            --borda: #334155;
+            --sombra: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            color: var(--texto);
+            min-height: 100vh;
+            padding: 24px;
+            max-width: 520px;
+            margin: 0 auto;
+            padding-bottom: 60px;
+        }
+
+        .cabecalho {
+            text-align: center;
+            margin-bottom: 32px;
+            padding-top: 10px;
+        }
+
+        .icone-app {
+            font-size: 40px;
+            margin-bottom: 8px;
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--texto);
+            letter-spacing: -0.3px;
+        }
+
+        .subtitulo {
+            font-size: 13px;
+            color: var(--texto-claro);
+            margin-top: 4px;
+        }
+
+        .aviso-seguranca {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 28px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #E0F2FE;
+        }
+
+        .aviso-seguranca strong {
+            color: var(--primaria-clara);
+        }
+
+        .tela {
+            background: var(--fundo-card);
+            padding: 28px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: var(--sombra);
+            border: 1px solid var(--borda);
+            backdrop-filter: blur(10px);
+        }
+
+        .escondido { display: none !important; }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--texto);
+        }
+
+        h3 {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--texto);
+        }
+
+        label {
+            display: block;
+            margin: 16px 0 8px;
+            font-weight: 500;
+            font-size: 14px;
+            color: #CBD5E1;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            background: var(--fundo-input);
+            color: var(--texto);
+            font-size: 15px;
+            transition: all 0.25s ease;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primaria);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 6px 0;
+            transition: all 0.2s ease;
+        }
+
+        button:active { transform: scale(0.98); }
+
+        .btn-primario {
+            background: linear-gradient(135deg, var(--primaria) 0%, #2563EB 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primario:hover {
+            background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+        }
+
+        .btn-secundario {
+            background: transparent;
+            color: var(--primaria-clara);
+            border: 1px solid var(--primaria);
+        }
+
+        .btn-secundario:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .btn-perigo {
+            background: linear-gradient(135deg, var(--erro) 0%, #DC2626 100%);
+            color: white;
+        }
+
+        .btn-perigo:hover {
+            background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+        }
+
+        .btn-pequeno {
+            padding: 8px 14px;
+            font-size: 13px;
+            width: auto;
+            display: inline-block;
+            margin: 0;
+        }
+
+        .grupo-botoes {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .grupo-botoes button { flex: 1; }
+
+        .status {
+            margin-top: 16px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .sucesso {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6EE7B7;
+            display: block;
+        }
+
+        .erro {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #FCA5A5;
+            display: block;
+        }
+
+        .dica {
+            font-size: 12px;
+            color: var(--texto-claro);
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+
+        .contador-palavras {
+            font-size: 13px;
+            margin: 6px 0 12px 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .contador-ok { color: var(--sucesso); }
+        .contador-aviso { color: var(--aviso); }
+        .contador-erro { color: var(--erro); }
+
+        /* Itens de Seed */
+        .item-seed {
+            background: rgba(51, 65, 85, 0.4);
+            padding: 18px;
+            border-radius: 12px;
+            margin-bottom: 14px;
+            border-left: 3px solid var(--primaria);
+            transition: all 0.2s ease;
+        }
+
+        .item-seed:hover {
+            background: rgba(51, 65, 85, 0.6);
+        }
+
+        .cabecalho-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .titulo-seed {
+            font-weight: 600;
+            color: var(--primaria-clara);
+            font-size: 15px;
+        }
+
+        .btn-remover {
+            background: rgba(239, 68, 68, 0.15);
+            color: #FCA5A5;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            width: auto;
+            margin: 0;
+        }
+
+        .btn-remover:hover {
+            background: rgba(239, 68, 68, 0.25);
+        }
+
+        .botao-adicionar {
+            border: 1px dashed var(--primaria);
+            background: rgba(59, 130, 246, 0.05);
+            color: var(--primaria-clara);
+            margin-top: 8px;
+        }
+
+        .botao-adicionar:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        /* Lista de cofres */
+        .lista-cofres p {
+            text-align: center;
+            color: var(--texto-claro);
+            padding: 30px 20px;
+        }
+
+        .cofre-item {
+            background: rgba(51, 65, 85, 0.4);
+            padding: 16px 18px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .cofre-item:hover {
+            background: rgba(59, 130, 246, 0.08);
+        }
+
+        .cofre-nome {
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .cofre-botoes {
+            display: flex;
+            gap: 8px;
+        }
+
+        .cofre-botoes button {
+            width: auto;
+            padding: 8px 14px;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .data-criacao {
+            font-size: 12px;
+            color: var(--texto-claro);
+            text-align: right;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--borda);
+        }
+
+        /* Modal de Confirmação */
+        .modal-fundo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(6px);
+        }
+
+        .modal-escondido { display: none !important; }
+
+        .modal-conteudo {
+            background: var(--fundo-card);
+            padding: 28px;
+            border-radius: 16px;
+            max-width: 420px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--borda);
+        }
+
+        .modal-conteudo h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 19px;
+        }
+
+        .modal-conteudo p {
+            font-size: 14px;
+            color: var(--texto-claro);
+            margin-bottom: 16px;
+        }
+
+        .modal-conteudo ul {
+            margin: 16px 0;
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .modal-conteudo li {
+            padding: 12px 14px;
+            background: rgba(59, 130, 246, 0.08);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .aviso-tempo {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.95) 0%, rgba(217, 119, 6, 0.95) 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 24px;
+            font-size: 13px;
+            font-weight: 500;
+            z-index: 50;
+            display: none;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+
+        .divisor {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--borda), transparent);
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="aviso-tempo" class="aviso-tempo">
+        ⏳ Fechando em instantes...
+    </div>
+
+    <div class="cabecalho">
+        <div class="icone-app">🔒</div>
+        <h1>Cofre BTC</h1>
+        <p class="subtitulo">Seed storage — seguro, offline e privado</p>
+    </div>
+
+    <div class="aviso-seguranca">
+        ⚠️ <strong>Seu cofre, suas chaves.</strong> Nenhum dado sai do seu aparelho. Sempre mantenha uma cópia em papel como fonte verdadeira. Perder a senha = sem recuperação.
+    </div>
+
+    <!-- TELA INICIAL -->
+    <div id="tela-inicial" class="tela">
+        <h2>Bem-vindo</h2>
+        <button class="btn-primario" onclick="mostrar('tela-criar')" style="margin-bottom: 12px;">
+            📦 Criar Novo Cofre
+        </button>
+        <button class="btn-secundario" onclick="mostrar('tela-abrir')">
+            📂 Abrir Cofre Existente
+        </button>
+    </div>
+
+    <!-- CRIAR COFRES -->
+    <div id="tela-criar" class="tela escondido">
+        <h2>Novo Cofre</h2>
+        
+        <div id="lista-seeds">
+            <div class="item-seed" data-id="0">
+                <div class="cabecalho-item">
+                    <span class="titulo-seed">Cofre 1</span>
+                    <button class="btn-remover" onclick="removerSeed(0)">✕</button>
+                </div>
+                <label>Nome da Carteira</label>
+                <input type="text" class="nome-seed" placeholder="ex: BlueWallet" value="BlueWallet">
+                <label>Frase de Recuperação</label>
+                <textarea class="texto-seed" placeholder="Digite as 12 ou 24 palavras, separadas por espaço..." oninput="atualizarContador(this)"></textarea>
+                <div class="contador-palavras"></div>
+            </div>
+        </div>
+
+        <button class="botao-adicionar" onclick="adicionarNovaSeed()">
+            + Adicionar Outro Cofre
+        </button>
+
+        <div class="divisor"></div>
+        
+        <h3>Proteja seu arquivo</h3>
+        <label>Senha Mestra</label>
+        <input type="password" id="senha1" placeholder="Crie uma senha forte">
+        
+        <label>Confirmar Senha</label>
+        <input type="password" id="senha2" placeholder="Digite a senha novamente">
+        
+        <div class="grupo-botoes">
+            <button class="btn-secundario" onclick="mostrar('tela-inicial')">Voltar</button>
+            <button class="btn-primario" onclick="prepararCriacao()">Revisar e Criar</button>
+        </div>
+        <div id="status-criar" class="status"></div>
+    </div>
+
+    <!-- MODAL DE CONFIRMAÇÃO -->
+    <div id="modal-confirmar" class="modal-fundo modal-escondido">
+        <div class="modal-conteudo">
+            <h3>📋 Confirmação</h3>
+            <p>Verifique se todos os cofres estão corretos antes de criptografar:</p>
+            <ul id="lista-confirmacao"></ul>
+            <p style="color: var(--aviso); font-size: 13px;">⚠️ Confira também que cada seed tem 12 ou 24 palavras corretas!</p>
+            <div class="grupo-botoes">
+                <button class="btn-secundario" onclick="fecharModal()">Voltar</button>
+                <button class="btn-primario" onclick="criarArquivo()">✅ Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABRIR COFRES -->
+    <div id="tela-abrir" class="tela escondido">
+        <h2>Abrir Cofre</h2>
+        <label>Arquivo (.btc)</label>
+        <input type="file" id="arquivo" accept=".btc">
+        
+        <label>Senha Mestra</label>
+        <input type="password" id="senha-abrir" placeholder="Digite sua senha">
+        
+        <div class="grupo-botoes">
+            <button class="btn-secundario" onclick="mostrar('tela-inicial')">Voltar</button>
+            <button class="btn-primario" onclick="abrirArquivo()">🔓 Desbloquear</button>
+        </div>
+        <div id="status-abrir" class="status"></div>
+    </div>
+
+    <!-- LISTA DE COFRES DESBLOQUEADOS -->
+    <div id="tela-lista" class="tela escondido">
+        <h2>Seus Cofres</h2>
+        <div id="data-criacao" class="data-criacao"></div>
+        <div id="lista-cofres" class="lista-cofres"></div>
+        <button class="btn-perigo" style="margin-top: 24px;" onclick="trancarTudo()">🔒 Fechar Tudo</button>
+    </div>
+
+    <!-- VISUALIZAR SEED -->
+    <div id="tela-visualizar" class="tela escondido">
+        <h2 id="titulo-visualizar">Seed</h2>
+        <label>Frase de Recuperação</label>
+        <textarea id="seed-mostrada" readonly onclick="copiarSeed()"></textarea>
+        <p class="dica">⚠️ Clique para copiar. A área de transferência será limpa automaticamente após 30 segundos.</p>
+        <div class="grupo-botoes">
+            <button class="btn-secundario" onclick="voltarLista()">← Voltar</button>
+            <button class="btn-perigo" onclick="trancarTudo()">🔒 Fechar</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/argon2-wasm@0.9.0/argon2.min.js"></script>
+    <script>
+        let argon2;
+        let contadorId = 1;
+        let dadosAbertos = [];
+        let temporizadorBloqueio = null;
+        let avisoTempoMostrado = false;
+        const TEMPO_BLOQUEIO_MS = 120000; // 2 minutos
+
+        // ========== CONTADOR DE PALAVRAS ==========
+        function atualizarContador(textarea) {
+            const texto = textarea.value.trim();
+            const palavras = texto ? texto.split(/\s+/).length : 0;
+            const container = textarea.parentElement.querySelector('.contador-palavras');
+            
+            if (palavras === 0) {
+                container.textContent = '';
+                container.className = 'contador-palavras';
+            } else if (palavras === 12 || palavras === 24) {
+                container.innerHTML = `✅ ${palavras} palavras`;
+                container.className = 'contador-palavras contador-ok';
+            } else if (palavras < 12) {
+                container.innerHTML = `⚠️ ${palavras} — faltam ${12 - palavras}`;
+                container.className = 'contador-palavras contador-aviso';
+            } else if (palavras > 12 && palavras < 24) {
+                container.innerHTML = `⚠️ ${palavras} — verifique se está correto`;
+                container.className = 'contador-palavras contador-aviso';
+            } else {
+                container.innerHTML = `❌ ${palavras} — deve ter 12 ou 24`;
+                container.className = 'contador-palavras contador-erro';
+            }
+        }
+
+        // ========== BLOQUEIO AUTOMÁTICO ==========
+        function reiniciarTemporizador() {
+            if (temporizadorBloqueio) clearTimeout(temporizadorBloqueio);
+            avisoTempoMostrado = false;
+            document.getElementById('aviso-tempo').style.display = 'none';
+            
+            temporizadorBloqueio = setTimeout(() => {
+                if (!document.getElementById('tela-inicial').classList.contains('escondido')) return;
+                
+                if (!avisoTempoMostrado) {
+                    avisoTempoMostrado = true;
+                    document.getElementById('aviso-tempo').style.display = 'block';
+                    setTimeout(() => {
+                        trancarTudo();
+                    }, 5000);
+                }
+            }, TEMPO_BLOQUEIO_MS - 5000);
+        }
+
+        ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click', 'input'].forEach(evento => {
+            document.addEventListener(evento, reiniciarTemporizador);
+        });
+
+        // ========== NAVEGAÇÃO ==========
+        function mostrar(id) {
+            document.querySelectorAll('.tela').forEach(t => t.classList.add('escondido'));
+            document.getElementById(id).classList.remove('escondido');
+            limparStatus();
+            reiniciarTemporizador();
+        }
+
+        function mostrarStatus(elId, msg, ok) {
+            const el = document.getElementById(elId);
+            el.textContent = msg;
+            el.className = 'status ' + (ok ? 'sucesso' : 'erro');
+            setTimeout(() => el.style.display = 'none', 6000);
+        }
+
+        function limparStatus() {
+            document.querySelectorAll('.status').forEach(s => s.style.display = 'none');
+        }
+
+        function adicionarNovaSeed() {
+            const container = document.getElementById('lista-seeds');
+            const novoItem = document.createElement('div');
+            novoItem.className = 'item-seed';
+            novoItem.setAttribute('data-id', contadorId);
+            novoItem.innerHTML = `
+                <div class="cabecalho-item">
+                    <span class="titulo-seed">Cofre ${contadorId + 1}</span>
+                    <button class="btn-remover" onclick="removerSeed(${contadorId})">✕</button>
+                </div>
+                <label>Nome da Carteira</label>
+                <input type="text" class="nome-seed" placeholder="ex: Aqua Wallet">
+                <label>Frase de Recuperação</label>
+                <textarea class="texto-seed" placeholder="Digite as palavras separadas por espaço..." oninput="atualizarContador(this)"></textarea>
+                <div class="contador-palavras"></div>
+            `;
+            container.appendChild(novoItem);
+            contadorId++;
+            reiniciarTemporizador();
+        }
+
+        function removerSeed(id) {
+            const item = document.querySelector(`.item-seed[data-id="${id}"]`);
+            if (item && document.querySelectorAll('.item-seed').length > 1) {
+                item.style.opacity = '0';
+                item.style.transform = 'translateX(-10px)';
+                setTimeout(() => item.remove(), 200);
+            }
+        }
+
+        function fecharModal() {
+            document.getElementById('modal-confirmar').classList.add('modal-escondido');
+        }
+
+        function prepararCriacao() {
+            const itens = document.querySelectorAll('.item-seed');
+            const nomes = [];
+            
+            for (const item of itens) {
+                const nome = item.querySelector('.nome-seed').value.trim();
+                const seed = item.querySelector('.texto-seed').value.trim();
+                if (!nome || !seed) {
+                    return mostrarStatus('status-criar', '❌ Preencha todos os campos', false);
+                }
+                nomes.push(nome);
+            }
+            
+            const lista = document.getElementById('lista-confirmacao');
+            lista.innerHTML = nomes.map(n => `<li>✅ ${n}</li>`).join('');
+            document.getElementById('modal-confirmar').classList.remove('modal-escondido');
+        }
+
+        // ========== CRIPTOGRAFIA ==========
+        function bytesAleatorios(n) {
+            const arr = new Uint8Array(n);
+            crypto.getRandomValues(arr);
+            return arr;
+        }
+
+        function paraTexto(bytes) {
+            return new TextDecoder().decode(bytes);
+        }
+
+        function paraBytes(texto) {
+            return new TextEncoder().encode(texto);
+        }
+
+        function paraBase64(bytes) {
+            return btoa(String.fromCharCode(...bytes))
+                .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+
+        function deBase64(str) {
+            str = str.replace(/-/g, '+').replace(/_/g, '/');
+            while (str.length % 4) str += '=';
+            return Uint8Array.from(atob(str), c => c.charCodeAt(0));
+        }
+
+        async function inicializarArgon2() {
+            if (argon2) return;
+            argon2 = await Argon2ID();
+        }
+
+        async function derivarChave(senha, sal) {
+            await inicializarArgon2();
+            const resultado = await argon2.hash(
+                senha, sal,
+                { type: argon2.Argon2Type.Argon2id, version: 0x13, m: 1 << 17, t: 3, p: 1, hashLen: 32 }
+            );
+            return crypto.subtle.importKey('raw', resultado.hash, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+        }
+
+        async function criptografar(dados, senha) {
+            const sal = bytesAleatorios(16);
+            const iv = bytesAleatorios(12);
+            const chave = await derivarChave(senha, sal);
+            const json = JSON.stringify(dados);
+            const dadosCript = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, chave, paraBytes(json));
+            
+            const arquivo = new Uint8Array(sal.length + iv.length + dadosCript.byteLength);
+            arquivo.set(sal, 0);
+            arquivo.set(iv, sal.length);
+            arquivo.set(new Uint8Array(dadosCript), sal.length + iv.length);
+            return paraBase64(arquivo);
+        }
+
+        async function descriptografar(dadosArquivo, senha) {
+            const conteudo = new Uint8Array(dadosArquivo);
+            const sal = conteudo.slice(0, 16);
+            const iv = conteudo.slice(16, 28);
+            const dados = conteudo.slice(28);
+            const chave = await derivarChave(senha, sal);
+            
+            try {
+                const decifrado = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, chave, dados);
+                return JSON.parse(paraTexto(decifrado));
+            } catch {
+                throw new Error('Senha incorreta ou arquivo corrompido');
+            }
+        }
+
+        function baixarArquivo(base64) {
+            const bytes = deBase64(base64);
+            const blob = new Blob([bytes], { type: 'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'cofres.btc';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function formatarData() {
+            const agora = new Date();
+            return agora.toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        async function criarArquivo() {
+            fecharModal();
+            
+            const itens = document.querySelectorAll('.item-seed');
+            const senha1 = document.getElementById('senha1').value;
+            const senha2 = document.getElementById('senha2').value;
+            const dataCriacao = formatarData();
+            
+            const cofres = [];
+            for (const item of itens) {
+                const nome = item.querySelector('.nome-seed').value.trim();
+                const seed = item.querySelector('.texto-seed').value.trim();
+                
+                if (!nome || !seed) {
+                    return mostrarStatus('status-criar', '❌ Preencha nome e seed de todos os cofres', false);
+                }
+                const palavras = seed.split(/\s+/).length;
+                if (palavras !== 12 && palavras !== 24) {
+                    return mostrarStatus('status-criar', `⚠️ "${nome}" não tem 12 ou 24 palavras`, false);
+                }
+                cofres.push({ nome, seed });
+            }
+            
+            if (senha1 !== senha2) return mostrarStatus('status-criar', '❌ As senhas não coincidem', false);
+            if (senha1.length < 8) return mostrarStatus('status-criar', '⚠️ Use pelo menos 8 caracteres', false);
+            
+            const dadosCompletos = {
+                versao: '1.1',
+                criadoEm: dataCriacao,
+                cofres: cofres
+            };
+            
+            try {
+                mostrarStatus('status-criar', '🔒 Criptografando...', true);
+                const arquivo = await criptografar(dadosCompletos, senha1);
+                baixarArquivo(arquivo);
+                mostrarStatus('status-criar', `✅ Arquivo criado em ${dataCriacao} e baixado!`, true);
+                
+                // Limpar
+                document.getElementById('senha1').value = '';
+                document.getElementById('senha2').value = '';
+                document.getElementById('lista-seeds').innerHTML = `
+                    <div class="item-seed" data-id="0">
+                        <div class="cabecalho-item">
+                            <span class="titulo-seed">Cofre 1</span>
+                            <button class="btn-remover" onclick="removerSeed(0)">✕</button>
+                        </div>
+                        <label>Nome da Carteira</label>
+                        <input type="text" class="nome-seed" placeholder="ex: BlueWallet" value="BlueWallet">
+                        <label>Frase de Recuperação</label>
+                        <textarea class="texto-seed" placeholder="Digite as 12 ou 24 palavras..." oninput="atualizarContador(this)"></textarea>
+                        <div class="contador-palavras"></div>
+                    </div>
+                `;
+                contadorId = 1;
+            } catch (e) {
+                mostrarStatus('status-criar', '❌ Erro: ' + e.message, false);
+            }
+        }
+
+        async function abrirArquivo() {
+            const arquivo = document.getElementById('arquivo').files[0];
+            const senha = document.getElementById('senha-abrir').value;
+            
+            if (!arquivo) return mostrarStatus('status-abrir', '❌ Selecione um arquivo', false);
+            if (!senha) return mostrarStatus('status-abrir', '❌ Digite a senha', false);
+            
+            try {
+                mostrarStatus('status-abrir', '🔓 Desbloqueando...', true);
+                const leitor = new FileReader();
+                leitor.onload = async function(e) {
+                    try {
+                        const dadosCompletos = await descriptografar(e.target.result, senha);
+                        dadosAbertos = dadosCompletos.cofres || dadosCompletos;
+                        document.getElementById('data-criacao').textContent = `📅 Criado em: ${dadosCompletos.criadoEm || 'Desconhecido'}`;
+                        renderizarLista();
+                        mostrar('tela-lista');
+                    } catch (err) {
+                        mostrarStatus('status-abrir', '❌ ' + err.message, false);
+                    }
+                };
+                leitor.readAsArrayBuffer(arquivo);
+            } catch (e) {
+                mostrarStatus('status-abrir', '❌ Erro: ' + e.message, false);
+            }
+        }
+
+        function renderizarLista() {
+            const container = document.getElementById('lista-cofres');
+            if (dadosAbertos.length === 0) {
+                container.innerHTML = '<p>Nenhum cofre encontrado</p>';
+                return;
+            }
+            container.innerHTML = '';
+            dadosAbertos.forEach((cofre, indice) => {
+                const el = document.createElement('div');
+                el.className = 'cofre-item';
+                el.innerHTML = `
+                    <span class="cofre-nome">${cofre.nome}</span>
+                    <div class="cofre-botoes">
+                        <button class="btn-primario btn-pequeno" onclick="verSeed(${indice})">👁️ Ver</button>
+                    </div>
+                `;
+                container.appendChild(el);
+            });
+        }
+
+        let seedAtual = null;
+        function verSeed(indice) {
+            seedAtual = dadosAbertos[indice];
+            document.getElementById('titulo-visualizar').textContent = seedAtual.nome;
+            document.getElementById('seed-mostrada').value = seedAtual.seed;
+            mostrar('tela-visualizar');
+        }
+
+        function copiarSeed() {
+            if (seedAtual && seedAtual.seed) {
+                navigator.clipboard.writeText(seedAtual.seed).then(() => {
+                    setTimeout(() => {
+                        navigator.clipboard.writeText('').catch(() => {});
+                    }, 30000);
+                }).catch(() => {});
+            }
+        }
+
+        function voltarLista() {
+            document.getElementById('seed-mostrada').value = '';
+            navigator.clipboard.writeText('').catch(() => {});
+            seedAtual = null;
+            mostrar('tela-lista');
+        }
+
+        function trancarTudo() {
+            if (temporizadorBloqueio) clearTimeout(temporizadorBloqueio);
+            dadosAbertos = [];
+            seedAtual = null;
+            document.getElementById('seed-mostrada').value = '';
+            document.getElementById('arquivo').value = '';
+            document.getElementById('senha-abrir').value = '';
+            document.getElementById('data-criacao').textContent = '';
+            document.getElementById('aviso-tempo').style.display = 'none';
+            navigator.clipboard.writeText('').catch(() => {});
+            mostrar('tela-inicial');
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && !document.getElementById('tela-inicial').classList.contains('escondido') === false) {
+                trancarTudo();
+            }
+        });
+    </script>
+</body>
+</html>
