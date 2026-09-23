@@ -7,7 +7,6 @@ const OFFLINE_FILES = [
   './icone.png'
 ];
 
-// Instalação: busca sempre da rede, evita cópias antigas
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
@@ -27,7 +26,6 @@ self.addEventListener('install', event => {
   })());
 });
 
-// Ativação: limpa APENAS caches antigos deste app — não afeta outros
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     const nomes = await caches.keys();
@@ -42,7 +40,6 @@ self.addEventListener('activate', event => {
   })());
 });
 
-// Estratégia: rede primeiro → se falhar, usa o cache
 self.addEventListener('fetch', event => {
   const request = event.request;
 
@@ -50,10 +47,8 @@ self.addEventListener('fetch', event => {
 
   const url = new URL(request.url);
 
-  // Apenas arquivos locais — NÃO intercepta nada externo
   if (url.origin !== self.location.origin) return;
 
-  // Navegação (página): tenta rede primeiro, se não tiver usa cache
   if (request.mode === 'navigate') {
     event.respondWith((async () => {
       try {
@@ -73,7 +68,6 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Arquivos estáticos: rede primeiro, atualiza cache
   event.respondWith((async () => {
     try {
       const resposta = await fetch(request, { cache: 'no-cache' });
