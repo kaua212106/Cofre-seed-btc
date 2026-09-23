@@ -727,17 +727,31 @@
             }
         }
 
+        // Baixa o arquivo de forma mais compatível com Chrome/Android e PWA.
+        // O URL não é revogado imediatamente, pois alguns celulares ainda
+        // precisam de alguns instantes para iniciar o download.
         function baixarArquivo(base64) {
             const bytes = deBase64(base64);
             const blob = new Blob([bytes], { type: 'application/octet-stream' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
+
             a.href = url;
             a.download = 'cofres.btc';
+            a.rel = 'noopener';
+            a.style.display = 'none';
             document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+
+            // Um pequeno atraso torna o download mais confiável em Android/PWA.
+            requestAnimationFrame(() => {
+                a.click();
+                setTimeout(() => {
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                }, 60000);
+            });
+
+            return true;
         }
 
         function formatarData() {
@@ -787,7 +801,7 @@
                 mostrarStatus('status-criar', '🔒 Criptografando...', true);
                 const arquivo = await criptografar(dadosCompletos, senha1);
                 baixarArquivo(arquivo);
-                mostrarStatus('status-criar', `✅ Arquivo criado em ${dataCriacao} e baixado!`, true);
+                mostrarStatus('status-criar', `✅ Arquivo criado em ${dataCriacao}. O download foi iniciado. Verifique a pasta Downloads.`, true);
                 
                 // Limpar
                 document.getElementById('senha1').value = '';
