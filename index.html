@@ -902,5 +902,15 @@
             }
         });
     </script>
+    <script>
+        // Ativa o modo PWA/offline do Cofre BTC.
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker.register("./service-worker.js")
+                    .then(() => console.log("Service Worker registrado"))
+                    .catch((erro) => console.error("Erro ao registrar Service Worker:", erro));
+            });
+        }
+    </script>
 </body>
 </html>

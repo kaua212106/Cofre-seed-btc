@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cofre-btc-v1.3-seed';
+const CACHE_NAME = 'cofre-btc-v1.4-seed';
 const CACHE_PREFIX = 'cofre-btc-';
 
 const OFFLINE_FILES = [
