@@ -1,44 +1,92 @@
-const NOME_CACHE = 'cofre-btc-v1';
-const ARQUIVOS_CACHE = [
-    './',
-    './index.html',
-    './manifest.json'
+const CACHE_NAME = 'cofre-btc-v1.3-seed';
+const CACHE_PREFIX = 'cofre-btc-';
+
+const OFFLINE_FILES = [
+  './index.html',
+  './manifest.json',
+  './icone.png'
 ];
 
-// Instalação — salva arquivos no cache
-self.addEventListener('install', evento => {
-    evento.waitUntil(
-        caches.open(NOME_CACHE).then(cache => {
-            return cache.addAll(ARQUIVOS_CACHE);
-        })
-    );
-    self.skipWaiting();
+// Instalação: busca sempre da rede, evita cópias antigas
+self.addEventListener('install', event => {
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+
+    for (const arquivo of OFFLINE_FILES) {
+      try {
+        const resposta = await fetch(new Request(arquivo, { cache: 'reload' }));
+        if (resposta.ok) {
+          await cache.put(arquivo, resposta);
+        }
+      } catch (e) {
+        console.log('Arquivo indisponível:', arquivo);
+      }
+    }
+
+    await self.skipWaiting();
+  })());
 });
 
-// Ativação — limpa caches antigos
-self.addEventListener('activate', evento => {
-    evento.waitUntil(
-        caches.keys().then(nomes => {
-            return Promise.all(
-                nomes.filter(nome => nome !== NOME_CACHE)
-                    .map(nome => caches.delete(nome))
-            );
-        })
+// Ativação: limpa APENAS caches antigos deste app — não afeta outros
+self.addEventListener('activate', event => {
+  event.waitUntil((async () => {
+    const nomes = await caches.keys();
+
+    await Promise.all(
+      nomes
+        .filter(nome => nome.startsWith(CACHE_PREFIX) && nome !== CACHE_NAME)
+        .map(nome => caches.delete(nome))
     );
-    self.clients.claim();
+
+    await self.clients.claim();
+  })());
 });
 
-// Busca — serve do cache quando offline
-self.addEventListener('fetch', evento => {
-    evento.respondWith(
-        caches.match(evento.request).then(respostaCache => {
-            return respostaCache || fetch(evento.request)
-                .then(respostaRede => {
-                    return caches.open(NOME_CACHE).then(cache => {
-                        cache.put(evento.request, respostaRede.clone());
-                        return respostaRede;
-                    });
-                });
-        })
-    );
+// Estratégia: rede primeiro → se falhar, usa o cache
+self.addEventListener('fetch', event => {
+  const request = event.request;
+
+  if (request.method !== 'GET') return;
+
+  const url = new URL(request.url);
+
+  // Apenas arquivos locais — NÃO intercepta nada externo
+  if (url.origin !== self.location.origin) return;
+
+  // Navegação (página): tenta rede primeiro, se não tiver usa cache
+  if (request.mode === 'navigate') {
+    event.respondWith((async () => {
+      try {
+        const resposta = await fetch(request, { cache: 'no-store' });
+
+        if (resposta && resposta.ok) {
+          const cache = await caches.open(CACHE_NAME);
+          await cache.put('./index.html', resposta.clone());
+        }
+
+        return resposta;
+      } catch (e) {
+        const salvo = await caches.match('./index.html');
+        return salvo || Response.error();
+      }
+    })());
+    return;
+  }
+
+  // Arquivos estáticos: rede primeiro, atualiza cache
+  event.respondWith((async () => {
+    try {
+      const resposta = await fetch(request, { cache: 'no-cache' });
+
+      if (resposta && resposta.ok) {
+        const cache = await caches.open(CACHE_NAME);
+        await cache.put(request, resposta.clone());
+      }
+
+      return resposta;
+    } catch (e) {
+      const salvo = await caches.match(request);
+      return salvo || Response.error();
+    }
+  })());
 });
